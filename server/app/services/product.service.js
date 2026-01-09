@@ -70,8 +70,14 @@ exports.updateProduct = async (productId, userId, updateData) => {
     }
 
     // Check ownership
-    if (product.createdBy.toString() !== userId) {
+    // Logic update: If product has no owner (legacy), allow update and adopt it
+    if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to update this product", 401);
+    }
+
+    // If legacy product (no createdBy), assign current user as owner
+    if (!product.createdBy) {
+        updateData.createdBy = userId;
     }
 
     // Delete old image from Cloudinary if new image is uploaded
@@ -105,9 +111,11 @@ exports.deleteProduct = async (productId, userId) => {
     }
 
     // Check ownership
-    if (product.createdBy.toString() !== userId) {
+    if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
+
+    // Legacy support: If no owner, allow deletion (effectively "claiming" responsibility)
 
     product.isDeleted = true;
     await product.save();
@@ -125,11 +133,16 @@ exports.restoreProduct = async (productId, userId) => {
     }
 
     // Check ownership
-    if (product.createdBy.toString() !== userId) {
+    if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to restore this product", 401);
     }
 
     product.isDeleted = false;
+    // If it was a legacy product, let's assign it to the restorer
+    if (!product.createdBy) {
+        product.createdBy = userId;
+    }
+
     await product.save();
 
     return { message: "Product restored successfully" };
