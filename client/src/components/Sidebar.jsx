@@ -16,6 +16,7 @@ const Sidebar = ({ selectedCategory, onCategoryChange }) => {
     { id: 'home', name: 'Home & Garden', icon: Home },
     { id: 'sports', name: 'Sports', icon: Trophy },
     { id: 'toys', name: 'Toys', icon: Gamepad2 },
+    { id: 'trash', name: 'Trash', icon: LogOut },
   ];
 
   const handleCategoryClick = (categoryId) => {
@@ -121,16 +122,14 @@ const Sidebar = ({ selectedCategory, onCategoryChange }) => {
                 <li key={category.id}>
                   <button
                     onClick={() => handleCategoryClick(category.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-                    }`}
+                      }`}
                   >
                     <Icon
-                      className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
-                        isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'
-                      }`}
+                      className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'
+                        }`}
                     />
                     <span className="truncate">{category.name}</span>
                   </button>

@@ -9,10 +9,12 @@ const {
 
 const { protect } = require("../middleware/auth");
 
+const { registerValidation, loginValidation } = require("../middleware/validators");
+
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/register", registerValidation, register);
+router.post("/login", loginValidation, login);
 router.get("/logout", protect, logout);
 router.get("/me", protect, getMe);
 router.post("/refresh", refreshToken);

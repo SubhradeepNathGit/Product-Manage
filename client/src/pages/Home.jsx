@@ -27,7 +27,12 @@ const Home = () => {
 
       const params = { page, limit: 12 };
       if (searchTerm.trim()) params.search = searchTerm.trim();
-      if (category) params.category = category;
+
+      if (category === 'trash') {
+        params.isDeleted = true;
+      } else if (category) {
+        params.category = category;
+      }
 
       const response = await productApi.getAllProducts(params);
 
@@ -52,6 +57,26 @@ const Home = () => {
 
   const handleSearch = (term) => setSearchTerm(term);
   const handleCategoryChange = (cat) => setCategory(cat);
+
+  const handleRestore = async (id) => {
+    try {
+      await productApi.restoreProduct(id);
+      fetchProducts();
+    } catch (err) {
+      console.error('Failed to restore', err);
+      // Optional: show toast
+    }
+  };
+
+  const handleForceDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this?")) return;
+    try {
+      await productApi.forceDeleteProduct(id);
+      fetchProducts();
+    } catch (err) {
+      console.error('Failed to delete', err);
+    }
+  };
 
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -166,7 +191,11 @@ const Home = () => {
               <>
                 {products.length > 0 ? (
                   <>
-                    <ProductList products={products} />
+                    <ProductList
+                      products={products}
+                      onRestore={handleRestore}
+                      onForceDelete={handleForceDelete}
+                    />
 
                     {totalPages > 1 && (
                       <Pagination

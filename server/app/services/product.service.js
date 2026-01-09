@@ -13,10 +13,10 @@ exports.createProduct = async (productData, userId) => {
 
 // Get All Products (with Pagination & Search & Soft Delete check)
 exports.getProducts = async (query) => {
-    const { page = 1, limit = 10, search = "", category = "", userId = "" } = query;
+    const { page = 1, limit = 10, search = "", category = "", userId = "", isDeleted } = query;
 
     const filter = {
-        isDeleted: false
+        isDeleted: isDeleted === "true",
     };
 
     if (search) {
@@ -49,7 +49,7 @@ exports.getProducts = async (query) => {
 
 // Get Single Product
 exports.getProductById = async (productId) => {
-    const product = await Product.findOne({ _id: productId, isDeleted: false }).populate(
+    const product = await Product.findOne({ _id: productId }).populate(
         "createdBy",
         "name email"
     );
@@ -83,14 +83,19 @@ exports.updateProduct = async (productId, userId, updateData) => {
     // Delete old image from Cloudinary if new image is uploaded
     if (updateData.image && product.image && product.image !== "no-photo.jpg") {
         try {
-            const publicId = product.image.split('/').pop().split('.')[0];
-            // Note: This is a simplistic way to extract public_id. 
-            // Better store public_id in DB or parse correctly based on Cloudinary URL.
-            // For 'multer-storage-cloudinary', the path is usually the full URL.
-            // It's safer to not break the app if delete fails.
-            // Actually, let's just proceed with update.
+            // Extract public_id from URL
+            const parts = product.image.split("product-listing/");
+            if (parts.length > 1) {
+                const afterFolder = parts[1];
+                const lastDotIndex = afterFolder.lastIndexOf(".");
+                const filename =
+                    lastDotIndex !== -1 ? afterFolder.substring(0, lastDotIndex) : afterFolder;
+                const publicId = `product-listing/${filename}`;
+                await cloudinary.uploader.destroy(publicId);
+            }
         } catch (err) {
             console.error("Cloudinary delete error", err);
+            // Non-blocking: continue with update even if delete fails
         }
     }
 
@@ -111,6 +116,7 @@ exports.deleteProduct = async (productId, userId) => {
     }
 
     // Check ownership
+    console.log(`[DeleteProduct] ProductID: ${productId}, UserID: ${userId}, Creator: ${product.createdBy}`);
     if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
@@ -146,4 +152,41 @@ exports.restoreProduct = async (productId, userId) => {
     await product.save();
 
     return { message: "Product restored successfully" };
+};
+
+// Force Delete Product (Permanent)
+exports.forceDeleteProduct = async (productId, userId) => {
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        throw new ErrorResponse("Product not found", 404);
+    }
+
+    // Check ownership
+    console.log(`[ForceDelete] ProductID: ${productId}, UserID: ${userId}, Creator: ${product.createdBy}`);
+    if (product.createdBy && product.createdBy.toString() !== userId) {
+        throw new ErrorResponse("Not authorized to delete this product", 401);
+    }
+
+    // Delete image from Cloudinary
+    if (product.image && product.image !== "no-photo.jpg") {
+        try {
+            // Extract public_id from URL
+            const parts = product.image.split("product-listing/");
+            if (parts.length > 1) {
+                const afterFolder = parts[1];
+                const lastDotIndex = afterFolder.lastIndexOf(".");
+                const filename =
+                    lastDotIndex !== -1 ? afterFolder.substring(0, lastDotIndex) : afterFolder;
+                const publicId = `product-listing/${filename}`;
+                await cloudinary.uploader.destroy(publicId);
+            }
+        } catch (err) {
+            console.error("Cloudinary delete error", err);
+        }
+    }
+
+    await Product.findByIdAndDelete(productId);
+
+    return { message: "Product permanently deleted" };
 };

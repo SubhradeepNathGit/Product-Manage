@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onRestore, onForceDelete }) => {
+  const { user } = useContext(AuthContext);
+  const isOwner = user && product.createdBy && (
+    (user._id || user.id) === (product.createdBy._id || product.createdBy)
+  );
+
   const imageUrl = product.image && product.image.startsWith('http')
     ? product.image
     : 'https://via.placeholder.com/300x300?text=No+Image';
@@ -23,8 +29,8 @@ const ProductCard = ({ product }) => {
         <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2">
           <span
             className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] xs:text-xs font-semibold rounded-full ${product.inStock
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
               }`}
           >
             {product.inStock ? 'In Stock' : 'Out of Stock'}
@@ -62,12 +68,33 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
 
-          <Link
-            to={`/product/${product._id}`}
-            className="w-full h-10 xs:w-auto text-center mb-3 mt-3 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            See Product
-          </Link>
+          {product.isDeleted ? (
+            isOwner ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onRestore(product._id)}
+                  className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
+                >
+                  Restore
+                </button>
+                <button
+                  onClick={() => onForceDelete(product._id)}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            ) : (
+              <span className="text-red-500 text-xs font-bold">Deleted</span>
+            )
+          ) : (
+            <Link
+              to={`/product/${product._id}`}
+              className="w-full h-10 xs:w-auto text-center mb-3 mt-3 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              See Product
+            </Link>
+          )}
         </div>
       </div>
     </div>

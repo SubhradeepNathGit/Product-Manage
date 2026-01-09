@@ -11,9 +11,11 @@ const ProductList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [search, setSearch] = useState("");
 
+    const [showDeleted, setShowDeleted] = useState(false);
+
     const fetchProducts = async () => {
         try {
-            const { data } = await api.get(`/products?page=${page}&limit=5&search=${search}`);
+            const { data } = await api.get(`/products?page=${page}&limit=5&search=${search}&isDeleted=${showDeleted}`);
             setProducts(data.data.products);
             setTotalPages(data.data.totalPages);
         } catch (error) {
@@ -23,13 +25,24 @@ const ProductList = () => {
 
     useEffect(() => {
         fetchProducts();
-    }, [page, search]);
+    }, [page, search, showDeleted]);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure?")) return;
+        if (!window.confirm("Are you sure you want to move this to trash?")) return;
         try {
             await api.delete(`/products/${id}`);
-            toast.success("Product deleted");
+            toast.success("Product moved to trash");
+            fetchProducts();
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Delete failed");
+        }
+    };
+
+    const handleForceDelete = async (id) => {
+        if (!window.confirm("Are you sure? This cannot be undone!")) return;
+        try {
+            await api.delete(`/products/${id}/force`);
+            toast.success("Product permanently deleted");
             fetchProducts();
         } catch (error) {
             toast.error(error.response?.data?.error || "Delete failed");
@@ -61,7 +74,7 @@ const ProductList = () => {
 
             <div className="container mx-auto px-6 py-8">
                 <div className="flex justify-between items-center mb-6">
-                    <div className="flex space-x-4">
+                    <div className="flex space-x-4 items-center">
                         <input
                             type="text"
                             placeholder="Search products..."
@@ -69,20 +82,44 @@ const ProductList = () => {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
+                        <button
+                            onClick={() => {
+                                setShowDeleted(!showDeleted);
+                                setPage(1);
+                            }}
+                            className={`px-4 py-2 rounded-lg border ${showDeleted ? 'bg-gray-800 text-white' : 'bg-white text-gray-700'}`}
+                        >
+                            {showDeleted ? 'Show Active' : 'Show Bin'}
+                        </button>
                     </div>
-                    <Link to="/products/new" className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition">
-                        + Add Product
-                    </Link>
+                    {!showDeleted && (
+                        <Link to="/products/new" className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition">
+                            + Add Product
+                        </Link>
+                    )}
                 </div>
+
+                {products.length === 0 && (
+                    <div className="text-center text-gray-500 py-10">
+                        {showDeleted ? "No deleted items found." : "No products found."}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.map((product) => (
                         <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                            <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-full h-48 object-cover"
-                            />
+                            <div className="relative">
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className={`w-full h-48 object-cover ${showDeleted ? 'grayscale' : ''}`}
+                                />
+                                {showDeleted && (
+                                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                                        Deleted
+                                    </div>
+                                )}
+                            </div>
                             <div className="p-4">
                                 <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
                                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.description}</p>
@@ -91,8 +128,17 @@ const ProductList = () => {
                                     <div className="flex space-x-2">
                                         {user?.id === product.createdBy._id && (
                                             <>
-                                                <Link to={`/products/edit/${product._id}`} className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600">Edit</Link>
-                                                <button onClick={() => handleDelete(product._id)} className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Delete</button>
+                                                {!showDeleted ? (
+                                                    <>
+                                                        <Link to={`/products/edit/${product._id}`} className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600">Edit</Link>
+                                                        <button onClick={() => handleDelete(product._id)} className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Delete</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => handleRestore(product._id)} className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">Restore</button>
+                                                        <button onClick={() => handleForceDelete(product._id)} className="px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-800">Delete Forever</button>
+                                                    </>
+                                                )}
                                             </>
                                         )}
                                     </div>

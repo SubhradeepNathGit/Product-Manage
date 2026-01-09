@@ -36,6 +36,16 @@ const productApi = {
     const res = await axiosInstance.delete(API_ENDPOINTS.PRODUCTS.DELETE(id));
     return res.data;
   },
+
+  forceDeleteProduct: async (id) => {
+    const res = await axiosInstance.delete(API_ENDPOINTS.PRODUCTS.DELETE(id) + "/force");
+    return res.data;
+  },
+
+  restoreProduct: async (id) => {
+    const res = await axiosInstance.put(API_ENDPOINTS.PRODUCTS.UPDATE(id) + "/restore");
+    return res.data;
+  },
 };
 
 export default productApi;

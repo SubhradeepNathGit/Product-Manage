@@ -14,10 +14,10 @@ connectDB();
 
 // Middlewares
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
   credentials: true
 }));
-// app.use(helmet()); // Temporarily disable helmet to rule out header issues
+app.use(helmet()); // Enabled helmet for security headers
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

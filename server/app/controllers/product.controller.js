@@ -104,3 +104,15 @@ exports.restoreProduct = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Force Delete Product
+// @route   DELETE /api/products/:id/force
+// @access  Private
+exports.forceDeleteProduct = async (req, res, next) => {
+    try {
+        const result = await productService.forceDeleteProduct(req.params.id, req.user.id);
+        res.status(200).json(result);
+    } catch (err) {
+        next(err);
+    }
+};

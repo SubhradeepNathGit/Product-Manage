@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import productApi from '../api/productApi';
+import AuthContext from '../context/AuthContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,19 +30,53 @@ const ProductDetail = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this product?')) {
+  const handleRestore = async () => {
+    try {
+      setDeleting(true);
+      await productApi.restoreProduct(id);
+      alert('Product restored successfully!');
+      navigate('/');
+    } catch (err) {
+      console.error('Error restoring product:', err);
+      alert(err.response?.data?.message || '❌ Failed to restore product');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Soft Delete (Move to Trash)
+  const handleSoftDelete = async () => {
+    if (!window.confirm('Are you sure you want to move this product to trash?')) {
       return;
     }
 
     try {
       setDeleting(true);
       await productApi.deleteProduct(id);
-      alert('Product deleted successfully!');
+      alert('Product moved to trash!');
       navigate('/');
     } catch (err) {
-      console.error('Error deleting product:', err);
-      alert(err.response?.data?.message || '❌ Failed to delete product');
+      console.error('Error soft deleting product:', err);
+      alert(err.response?.data?.message || '❌ Failed to move to trash');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Force Delete (Permanent)
+  const handleForceDelete = async () => {
+    if (!window.confirm('Are you sure you want to PERMANENTLY delete this product? This acton cannot be undone!')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await productApi.forceDeleteProduct(id);
+      alert('Product permanently deleted!');
+      navigate('/');
+    } catch (err) {
+      console.error('Error force deleting product:', err);
+      alert(err.response?.data?.message || '❌ Failed to permanently delete product');
     } finally {
       setDeleting(false);
     }
@@ -138,8 +174,8 @@ const ProductDetail = () => {
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 <span
                   className={`px-3 py-1 text-sm font-semibold rounded-full ${product.inStock
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
                     }`}
                 >
                   {product.inStock ? 'In Stock' : 'Out of Stock'}
@@ -219,19 +255,44 @@ const ProductDetail = () => {
                 >
                   Edit Product
                 </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {deleting ? 'Deleting...' : 'Delete Product'}
-                </button>
+                {user && product.createdBy && (
+                  // Check matching IDs (handling both _id and id properties, converting to string)
+                  String(user._id || user.id) === String(product.createdBy._id || product.createdBy)
+                ) && (
+                    <>
+                      {!product.isDeleted ? (
+                        <button
+                          onClick={handleSoftDelete}
+                          disabled={deleting}
+                          className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deleting ? 'Processing...' : 'Move to Trash'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleRestore}
+                          disabled={deleting}
+                          className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deleting ? 'Processing...' : 'Restore'}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={handleForceDelete}
+                        disabled={deleting}
+                        className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deleting ? 'Processing...' : 'Delete'}
+                      </button>
+                    </>
+                  )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
