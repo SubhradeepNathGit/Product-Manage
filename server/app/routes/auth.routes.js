@@ -2,6 +2,7 @@ const express = require("express");
 const {
     register,
     login,
+    verifyEmail,
     logout,
     getMe,
     refreshToken,
@@ -14,6 +15,7 @@ const { registerValidation, loginValidation } = require("../middleware/validator
 const router = express.Router();
 
 router.post("/register", registerValidation, register);
+router.post("/verify-email", verifyEmail);
 router.post("/login", loginValidation, login);
 router.get("/logout", protect, logout);
 router.get("/me", protect, getMe);

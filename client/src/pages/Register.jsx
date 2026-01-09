@@ -7,11 +7,31 @@ const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [successMsg, setSuccessMsg] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await register(name, email, password);
+        try {
+            const data = await register(name, email, password);
+            setSuccessMsg(data.data || "Please check your email to verify your account.");
+        } catch (error) {
+            // Error handled in context
+        }
     };
+
+    if (successMsg) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md text-center">
+                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
+                    <p className="text-gray-700">{successMsg}</p>
+                    <Link to="/login" className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Go to Login
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">

@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
             toast.success("Login successful!");
             navigate("/");
         } catch (error) {
-            toast.error(error.response?.data?.error || "Login failed");
+            toast.error(error.response?.data?.message || "Login failed");
             throw error;
         }
     };
@@ -61,16 +61,9 @@ export const AuthProvider = ({ children }) => {
     const register = async (name, email, password) => {
         try {
             const response = await api.post("/auth/register", { name, email, password });
-            const { accessToken, refreshToken, user } = response.data;
-
-            localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
-            setToken(accessToken);
-            setUser(user);
-            toast.success("Registration successful!");
-            navigate("/");
+            return response.data;
         } catch (error) {
-            toast.error(error.response?.data?.error || "Registration failed");
+            toast.error(error.response?.data?.message || "Registration failed");
             throw error;
         }
     };

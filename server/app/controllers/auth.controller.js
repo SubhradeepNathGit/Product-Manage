@@ -23,6 +23,10 @@ const sendTokenResponse = async (user, statusCode, res) => {
     });
 };
 
+const sendEmail = require("../utils/sendEmail");
+
+// ... (sendTokenResponse helper remains here but I need to make sure I don't deleting it. I will target the imports and register function)
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
@@ -30,9 +34,50 @@ exports.register = async (req, res, next) => {
     try {
         console.log("Register Request Body:", req.body);
         const user = await authService.register(req.body);
-        sendTokenResponse(user, 201, res);
+
+        // Create verification url
+        const verifyUrl = `${process.env.CLIENT_URL}/verify-email?token=${user.verificationToken}`;
+
+        const message = `You are receiving this email because you (or someone else) has requested the creation of an account.\n\nPlease click on the following link to verify your email:\n\n<a href="${verifyUrl}">${verifyUrl}</a>`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: "Account Verification",
+                message,
+                html: message.replace(/\n/g, '<br>')
+            });
+
+            res.status(200).json({
+                success: true,
+                data: `Email sent to ${user.email}. Please check your email to verify your account.`
+            });
+        } catch (err) {
+            console.log(err);
+            // We could delete the user here if email fails, but for now let's just error
+            // await user.remove(); 
+            return next(new ErrorResponse("Email could not be sent", 500));
+        }
     } catch (err) {
         console.error("Register Error:", err);
+        next(err);
+    }
+};
+
+// @desc    Verify Email
+// @route   POST /api/auth/verify-email
+// @access  Public
+exports.verifyEmail = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+        const user = await authService.verifyEmail(token);
+        // After verification, we can either log them in automatically or ask them to login.
+        // Let's ask them to login.
+        res.status(200).json({
+            success: true,
+            data: "Email verified successfully. Please login."
+        });
+    } catch (err) {
         next(err);
     }
 };

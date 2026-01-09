@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const User = require("../models/User");
 const ErrorResponse = require("../utils/errorResponse");
 
@@ -5,10 +6,14 @@ const ErrorResponse = require("../utils/errorResponse");
 exports.register = async (userData) => {
     const { name, email, password } = userData;
 
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+
     const user = await User.create({
         name,
         email,
         password,
+        verificationToken,
+        isVerified: false,
     });
 
     return user;
@@ -31,6 +36,25 @@ exports.login = async (email, password) => {
     if (!isMatch) {
         throw new ErrorResponse("Invalid credentials", 401);
     }
+
+    if (!user.isVerified) {
+        throw new ErrorResponse("Please verify your email to login", 401);
+    }
+
+    return user;
+};
+
+// Verify Email
+exports.verifyEmail = async (token) => {
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+        throw new ErrorResponse("Invalid verification token", 400);
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
 
     return user;
 };

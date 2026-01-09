@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import AddProduct from "./pages/AddProduct";
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Main Product Listing Page */}
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
