@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
@@ -5,6 +6,7 @@ import AddProduct from '../pages/AddProduct';
 import EditProduct from '../pages/EditProduct';
 import ProductDetail from '../pages/ProductDetail';
 import Navbar from '../layout/Navbar';
+import VerifyOTP from '../pages/VerifyOTP';
 
 
 const Routing = () => {
@@ -17,6 +19,7 @@ const Routing = () => {
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product/:id" element={<EditProduct />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/verify-email" element={<VerifyOTP />} />
           <Route
             path="*"
             element={
@@ -27,7 +30,7 @@ const Routing = () => {
           />
         </Routes>
       </main>
-    
+
     </div>
   );
 };

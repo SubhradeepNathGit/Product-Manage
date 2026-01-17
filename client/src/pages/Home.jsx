@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import productApi from '../api/productApi';
 import ProductList from '../components/ProductList';
 import Pagination from '../components/Pagination';
+import FilterBar from '../components/FilterBar';
 import SearchBar from '../components/SearchBar';
 import Sidebar from '../components/Sidebar';
 
@@ -19,13 +20,27 @@ const Home = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // New Filter State
+  const [sort, setSort] = useState('latest');
+  const [filters, setFilters] = useState({
+    minPrice: '',
+    maxPrice: '',
+    inStock: ''
+  });
+
   // Fetch products
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const params = { page, limit: 12 };
+      const params = {
+        page,
+        limit: 12,
+        sort,
+        ...filters
+      };
+
       if (searchTerm.trim()) params.search = searchTerm.trim();
 
       if (category === 'trash') {
@@ -48,12 +63,16 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [page, searchTerm, category]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchProducts();
+    }, 500); // Debounce duration: 500ms
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [page, searchTerm, category, sort, filters]); // Added sort and filters
 
   useEffect(() => {
     if (page !== 1) setPage(1);
-  }, [searchTerm, category]);
+  }, [searchTerm, category, sort, filters]);
 
   const handleSearch = (term) => setSearchTerm(term);
   const handleCategoryChange = (cat) => setCategory(cat);
@@ -81,6 +100,8 @@ const Home = () => {
   const handleClearFilters = () => {
     setSearchTerm('');
     setCategory('');
+    setSort('latest');
+    setFilters({ minPrice: '', maxPrice: '', inStock: '' });
     setPage(1);
   };
 
@@ -130,18 +151,16 @@ const Home = () => {
                     setSearchTerm={handleSearch}
                   />
                 </div>
+              </div>
 
-                {/* Right: Clear Filters button */}
-                <div className="flex justify-end md:justify-start">
-                  {(searchTerm || category) && (
-                    <button
-                      onClick={handleClearFilters}
-                      className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-xs sm:text-sm md:text-base"
-                    >
-                      Clear Filters
-                    </button>
-                  )}
-                </div>
+              <div className="mt-4">
+                <FilterBar
+                  filters={filters}
+                  setFilters={setFilters}
+                  sort={sort}
+                  setSort={setSort}
+                  onClear={handleClearFilters}
+                />
               </div>
 
               {/* Active Filters */}

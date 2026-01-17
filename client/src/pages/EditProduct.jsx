@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import productApi from '../api/productApi';
 
 const EditProduct = () => {
@@ -43,7 +44,7 @@ const EditProduct = () => {
       }
     } catch (err) {
       console.error('Error fetching product:', err);
-      alert('Failed to load product details');
+      toast.error('Failed to load product details');
       navigate('/');
     } finally {
       setLoading(false);
@@ -97,7 +98,7 @@ const EditProduct = () => {
         dataTransfer.items.add(file);
         setValue('image', dataTransfer.files);
       } else {
-        alert('Please drop an image file (PNG, JPG, WEBP)');
+        toast.error('Please drop an image file (PNG, JPG, WEBP)');
       }
     }
   };
@@ -119,11 +120,11 @@ const EditProduct = () => {
 
       await productApi.updateProduct(id, formData);
 
-      alert('Product updated successfully!');
+      toast.success('Product updated successfully!');
       navigate(`/product/${id}`);
     } catch (err) {
       console.error('Error updating product:', err);
-      alert(err.response?.data?.message || 'Failed to update product. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to update product. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -144,7 +145,7 @@ const EditProduct = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4 md:py-12">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -302,8 +303,8 @@ const EditProduct = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition ${isDragging
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:border-blue-400'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-400'
                   }`}
               >
                 <div className="space-y-2 text-center">

@@ -68,6 +68,57 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const verifyOtp = async (email, otp) => {
+        try {
+            const response = await api.post("/auth/verify-email", { email, otp });
+            return response.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Verification failed");
+            throw error;
+        }
+    };
+
+    const resendOtp = async (email) => {
+        try {
+            const response = await api.post("/auth/resend-otp", { email });
+            toast.success("OTP resent successfully");
+            return response.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Resend failed");
+            throw error;
+        }
+    };
+
+    const forgotPassword = async (email) => {
+        try {
+            const response = await api.post("/auth/forgotpassword", { email });
+            toast.success("Password reset email sent!");
+            return response.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to send email");
+            throw error;
+        }
+    };
+
+    const resetPassword = async (token, password) => {
+        try {
+            const response = await api.put(`/auth/resetpassword/${token}`, { password });
+            const { accessToken, refreshToken, user } = response.data;
+
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            setToken(accessToken);
+            setUser(user);
+
+            toast.success("Password reset successful! Logging in...");
+            navigate("/");
+            return response.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Password reset failed");
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
             await api.get("/auth/logout");
@@ -83,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, verifyOtp, resendOtp, forgotPassword, resetPassword, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

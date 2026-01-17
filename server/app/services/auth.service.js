@@ -6,13 +6,17 @@ const ErrorResponse = require("../utils/errorResponse");
 exports.register = async (userData) => {
     const { name, email, password } = userData;
 
-    const verificationToken = crypto.randomBytes(20).toString("hex");
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // OTP expires in 3 minutes
+    const otpExpire = new Date(Date.now() + 3 * 60 * 1000);
 
     const user = await User.create({
         name,
         email,
         password,
-        verificationToken,
+        otp,
+        otpExpire,
         isVerified: false,
     });
 
@@ -45,15 +49,52 @@ exports.login = async (email, password) => {
 };
 
 // Verify Email
-exports.verifyEmail = async (token) => {
-    const user = await User.findOne({ verificationToken: token });
+exports.verifyEmail = async (email, otp) => {
+    const user = await User.findOne({ email });
 
     if (!user) {
-        throw new ErrorResponse("Invalid verification token", 400);
+        throw new ErrorResponse("User not found", 404);
+    }
+
+    if (user.isVerified) {
+        return user; // Already verified, just return
+    }
+
+    if (user.otp !== otp) {
+        throw new ErrorResponse("Invalid OTP", 400);
+    }
+
+    if (user.otpExpire < Date.now()) {
+        throw new ErrorResponse("OTP has expired", 400);
     }
 
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    return user;
+};
+
+// Resend OTP
+exports.resendOtp = async (email) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ErrorResponse("User not found", 404);
+    }
+
+    if (user.isVerified) {
+        throw new ErrorResponse("Email already verified", 400);
+    }
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // OTP expires in 3 minutes
+    const otpExpire = new Date(Date.now() + 3 * 60 * 1000);
+
+    user.otp = otp;
+    user.otpExpire = otpExpire;
     await user.save();
 
     return user;
@@ -67,4 +108,46 @@ exports.updateRefreshToken = async (userId, refreshToken) => {
 // Clear refresh token
 exports.logout = async (userId) => {
     await User.findByIdAndUpdate(userId, { refreshToken: "" });
+};
+
+// Forgot Password
+exports.forgotPassword = async (email) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ErrorResponse("There is no user with that email", 404);
+    }
+
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    return { user, resetToken };
+};
+
+// Reset Password
+exports.resetPassword = async (resetToken, password) => {
+    // Get hashed token
+    const resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+        throw new ErrorResponse("Invalid token", 400);
+    }
+
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    return user;
 };

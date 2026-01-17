@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import productApi from '../api/productApi';
 
 const AddProduct = () => {
@@ -66,7 +67,7 @@ const AddProduct = () => {
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       const file = files[0];
-      
+
       // Check if file is an image
       if (file.type.startsWith('image/')) {
         // Create a new FileList-like object
@@ -82,25 +83,25 @@ const AddProduct = () => {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      
+
       const formData = new FormData();
       formData.append('name', data.name);
       formData.append('description', data.description);
       formData.append('price', data.price);
       formData.append('category', data.category);
       formData.append('inStock', data.inStock);
-      
+
       if (data.image && data.image[0]) {
         formData.append('image', data.image[0]);
       }
 
       await productApi.createProduct(formData);
-      
-      alert('Product added successfully!');
+
+      toast.success('Product added successfully!');
       navigate('/');
     } catch (err) {
       console.error('Error creating product:', err);
-      alert(err.response?.data?.message || 'Failed to add product. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to add product. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +109,7 @@ const AddProduct = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4 md:py-12">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -147,13 +148,12 @@ const AddProduct = () => {
               <input
                 type="text"
                 placeholder="Enter product name"
-                {...register('name', { 
+                {...register('name', {
                   required: 'Product name is required',
                   minLength: { value: 3, message: 'Name must be at least 3 characters' }
                 })}
-                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {errors.name && (
                 <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
@@ -168,13 +168,12 @@ const AddProduct = () => {
               <textarea
                 rows="4"
                 placeholder="Enter product description"
-                {...register('description', { 
+                {...register('description', {
                   required: 'Description is required',
                   minLength: { value: 10, message: 'Description must be at least 10 characters' }
                 })}
-                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none ${errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {errors.description && (
                 <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
@@ -197,9 +196,8 @@ const AddProduct = () => {
                     min: { value: 0, message: 'Price must be 0 or greater' },
                     valueAsNumber: true,
                   })}
-                  className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.price ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.price ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 />
                 {errors.price && (
                   <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
@@ -213,9 +211,8 @@ const AddProduct = () => {
                 </label>
                 <select
                   {...register('category', { required: 'Category is required' })}
-                  className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.category ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.category ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 >
                   <option value="">Select category</option>
                   <option value="electronics">Electronics</option>
@@ -255,11 +252,10 @@ const AddProduct = () => {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition ${
-                  isDragging
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:border-blue-400'
-                }`}
+                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition ${isDragging
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-400'
+                  }`}
               >
                 <div className="space-y-2 text-center">
                   {imagePreview ? (

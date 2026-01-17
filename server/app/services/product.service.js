@@ -13,7 +13,18 @@ exports.createProduct = async (productData, userId) => {
 
 // Get All Products (with Pagination & Search & Soft Delete check)
 exports.getProducts = async (query) => {
-    const { page = 1, limit = 10, search = "", category = "", userId = "", isDeleted } = query;
+    const {
+        page = 1,
+        limit = 10,
+        search = "",
+        category = "",
+        userId = "",
+        isDeleted,
+        minPrice,
+        maxPrice,
+        inStock,
+        sort
+    } = query;
 
     const filter = {
         isDeleted: isDeleted === "true",
@@ -31,11 +42,47 @@ exports.getProducts = async (query) => {
         filter.createdBy = userId;
     }
 
+    // Price Filter
+    if (minPrice || maxPrice) {
+        filter.price = {};
+        if (minPrice) filter.price.$gte = Number(minPrice);
+        if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // Availability Filter
+    if (inStock !== undefined && inStock !== "") {
+        filter.inStock = inStock === "true";
+    }
+
+    // Sorting Logic
+    let sortOption = { createdAt: -1 }; // Default: Latest
+    if (sort) {
+        switch (sort) {
+            case "price_asc":
+                sortOption = { price: 1 };
+                break;
+            case "price_desc":
+                sortOption = { price: -1 };
+                break;
+            case "latest":
+                sortOption = { createdAt: -1 };
+                break;
+            case "a_z":
+                sortOption = { name: 1 };
+                break;
+            case "z_a":
+                sortOption = { name: -1 };
+                break;
+            default:
+                sortOption = { createdAt: -1 };
+        }
+    }
+
     const products = await Product.find(filter)
         .populate("createdBy", "name email")
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .sort({ createdAt: -1 });
+        .sort(sortOption);
 
     const count = await Product.countDocuments(filter);
 
@@ -116,7 +163,7 @@ exports.deleteProduct = async (productId, userId) => {
     }
 
     // Check ownership
-    console.log(`[DeleteProduct] ProductID: ${productId}, UserID: ${userId}, Creator: ${product.createdBy}`);
+
     if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
@@ -163,7 +210,7 @@ exports.forceDeleteProduct = async (productId, userId) => {
     }
 
     // Check ownership
-    console.log(`[ForceDelete] ProductID: ${productId}, UserID: ${userId}, Creator: ${product.createdBy}`);
+
     if (product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
