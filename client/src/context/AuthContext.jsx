@@ -14,31 +14,37 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const handleAuthError = () => {
+            logout();
+        };
+
+        window.addEventListener("auth-error", handleAuthError);
+
         const initAuth = async () => {
             if (token) {
                 try {
                     const decoded = jwtDecode(token);
                     const currentTime = Date.now() / 1000;
-                    if (decoded.exp < currentTime) {
-                        // Token expired, try refresh or logout
-                        // For simplicity, let's just logout if initially expired, 
-                        // or rely on the axios interceptor to handle refresh
-                        await logout(); // Or try refresh here
-                    } else {
-                        // Fetch user profile if needed, or just decode
-                        // For now, let's fetch profile to be sure
-                        const { data } = await api.get("/auth/me");
-                        setUser(data.data);
-                    }
+
+                    // Even if token is expired, the axios interceptor might refresh it on the first call.
+                    // But for initialization, if it's expired, we might want to try a silent refresh or just let the first API call handle it.
+                    // To be safe, if we have a token, we try to get 'me'.
+                    const { data } = await api.get("/auth/me");
+                    setUser(data.data);
                 } catch (error) {
                     console.error("Auth init error", error);
-                    logout();
+                    // If /auth/me fails, interceptor should have tried refresh. 
+                    // If it still fails, it will dispatch "auth-error" which calls logout().
                 }
             }
             setLoading(false);
         };
 
         initAuth();
+
+        return () => {
+            window.removeEventListener("auth-error", handleAuthError);
+        };
     }, [token]);
 
     const login = async (email, password) => {
