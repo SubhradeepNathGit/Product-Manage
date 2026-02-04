@@ -109,16 +109,16 @@ exports.getProductById = async (productId) => {
 };
 
 // Update Product
-exports.updateProduct = async (productId, userId, updateData) => {
+exports.updateProduct = async (productId, userId, updateData, userRole) => {
     let product = await Product.findById(productId);
 
     if (!product || product.isDeleted) {
         throw new ErrorResponse("Product not found", 404);
     }
 
-    // Check ownership
-    // Logic update: If product has no owner (legacy), allow update and adopt it
-    if (product.createdBy && product.createdBy.toString() !== userId) {
+    // Check ownership or role
+    const isAdminOrManager = userRole === 'admin' || userRole === 'manager';
+    if (!isAdminOrManager && product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to update this product", 401);
     }
 
@@ -155,16 +155,16 @@ exports.updateProduct = async (productId, userId, updateData) => {
 };
 
 // Soft Delete Product
-exports.deleteProduct = async (productId, userId) => {
+exports.deleteProduct = async (productId, userId, userRole) => {
     const product = await Product.findById(productId);
 
     if (!product || product.isDeleted) {
         throw new ErrorResponse("Product not found", 404);
     }
 
-    // Check ownership
-
-    if (product.createdBy && product.createdBy.toString() !== userId) {
+    // Check ownership or role
+    const isAdminOrManager = userRole === 'admin' || userRole === 'manager';
+    if (!isAdminOrManager && product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
 
@@ -177,7 +177,7 @@ exports.deleteProduct = async (productId, userId) => {
 };
 
 // Restore Product
-exports.restoreProduct = async (productId, userId) => {
+exports.restoreProduct = async (productId, userId, userRole) => {
     // We need to find even deleted ones
     const product = await Product.findById(productId);
 
@@ -185,8 +185,9 @@ exports.restoreProduct = async (productId, userId) => {
         throw new ErrorResponse("Product not found", 404);
     }
 
-    // Check ownership
-    if (product.createdBy && product.createdBy.toString() !== userId) {
+    // Check ownership or role
+    const isAdminOrManager = userRole === 'admin' || userRole === 'manager';
+    if (!isAdminOrManager && product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to restore this product", 401);
     }
 
@@ -202,16 +203,16 @@ exports.restoreProduct = async (productId, userId) => {
 };
 
 // Force Delete Product (Permanent)
-exports.forceDeleteProduct = async (productId, userId) => {
+exports.forceDeleteProduct = async (productId, userId, userRole) => {
     const product = await Product.findById(productId);
 
     if (!product) {
         throw new ErrorResponse("Product not found", 404);
     }
 
-    // Check ownership
-
-    if (product.createdBy && product.createdBy.toString() !== userId) {
+    // Check ownership or role
+    const isAdminOrManager = userRole === 'admin' || userRole === 'manager';
+    if (!isAdminOrManager && product.createdBy && product.createdBy.toString() !== userId) {
         throw new ErrorResponse("Not authorized to delete this product", 401);
     }
 

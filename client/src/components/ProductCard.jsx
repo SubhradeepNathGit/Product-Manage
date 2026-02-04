@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
 const ProductCard = ({ product, onRestore, onForceDelete }) => {
-  const { user } = useContext(AuthContext);
+  const { user, hasPermission } = useContext(AuthContext);
   const isOwner = user && product.createdBy && (
     (user._id || user.id) === (product.createdBy._id || product.createdBy)
   );
@@ -70,20 +70,24 @@ const ProductCard = ({ product, onRestore, onForceDelete }) => {
       {/* Action Footer (Outside Link) */}
       <div className="px-4 pb-4 bg-white">
         {product.isDeleted ? (
-          isOwner ? (
+          (hasPermission('update_product') || hasPermission('delete_product')) ? (
             <div className="flex gap-2 w-full">
-              <button
-                onClick={(e) => { e.preventDefault(); onRestore(product._id); }}
-                className="flex-1 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold hover:bg-green-100 transition-colors border border-green-200"
-              >
-                Restore
-              </button>
-              <button
-                onClick={(e) => { e.preventDefault(); onForceDelete(product._id); }}
-                className="flex-1 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold hover:bg-red-100 transition-colors border border-red-200"
-              >
-                Delete
-              </button>
+              {hasPermission('update_product') && (
+                <button
+                  onClick={(e) => { e.preventDefault(); onRestore(product._id); }}
+                  className="flex-1 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold hover:bg-green-100 transition-colors border border-green-200"
+                >
+                  Restore
+                </button>
+              )}
+              {hasPermission('delete_product') && (
+                <button
+                  onClick={(e) => { e.preventDefault(); onForceDelete(product._id); }}
+                  className="flex-1 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold hover:bg-red-100 transition-colors border border-red-200"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ) : (
             <div className="w-full text-center py-1.5 bg-gray-50 text-gray-400 rounded-md text-xs font-semibold border border-gray-200">

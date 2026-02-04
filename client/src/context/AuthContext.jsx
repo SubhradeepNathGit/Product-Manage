@@ -64,14 +64,27 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password) => {
+    const register = async (name, email, password, role) => {
         try {
-            const response = await api.post("/auth/register", { name, email, password });
+            const response = await api.post("/auth/register", { name, email, password, role });
             return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || "Registration failed");
             throw error;
         }
+    };
+
+    const rolesPermissions = {
+        admin: ["create_product", "read_product", "update_product", "delete_product"],
+        manager: ["create_product", "read_product", "update_product"],
+        employee: ["create_product", "read_product"]
+    };
+
+    const hasPermission = (permission) => {
+        if (!user) return false;
+        const userRole = (user.role || "admin").toLowerCase();
+        const permissions = rolesPermissions[userRole] || [];
+        return permissions.includes(permission);
     };
 
     const verifyOtp = async (email, otp) => {
@@ -126,6 +139,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
+        // Prevent multiple toasts/actions if already logged out (e.g. multiple failed requests triggering 401)
+        const isSessionActive = !!localStorage.getItem("accessToken");
+
+        if (!isSessionActive) {
+            // Already logged out, ensure state is clear but don't toast
+            setToken("");
+            setUser(null);
+            navigate("/login");
+            return;
+        }
+
         try {
             await api.get("/auth/logout");
         } catch (e) {
@@ -140,7 +164,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, verifyOtp, resendOtp, forgotPassword, resetPassword, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, hasPermission, verifyOtp, resendOtp, forgotPassword, resetPassword, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

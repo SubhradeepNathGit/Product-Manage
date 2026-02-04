@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import productApi from '../api/productApi';
@@ -7,9 +7,11 @@ import Pagination from '../components/Pagination';
 import FilterBar from '../components/FilterBar';
 import SearchBar from '../components/SearchBar';
 import Sidebar from '../components/Sidebar';
+import AuthContext from '../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { hasPermission } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -129,13 +131,15 @@ const Home = () => {
                 </p>
               </div>
 
-              <button
-                onClick={() => navigate('/add-product')}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-sm hover:shadow-md active:scale-95"
-              >
-                <Plus className="w-5 h-5" />
-                Add Product
-              </button>
+              {hasPermission('create_product') && (
+                <button
+                  onClick={() => navigate('/add-product')}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-sm hover:shadow-md active:scale-95"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Product
+                </button>
+              )}
             </div>
 
             {/* Search + Filters Section */}
@@ -250,7 +254,7 @@ const Home = () => {
                         : 'Start by adding your first product to the catalog'}
                     </p>
 
-                    {!searchTerm && !category && (
+                    {!searchTerm && !category && hasPermission('create_product') && (
                       <button
                         onClick={() => navigate('/add-product')}
                         className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"

@@ -6,7 +6,7 @@ import AuthContext from '../context/AuthContext';
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, hasPermission } = useContext(AuthContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,6 +14,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     fetchProductDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProductDetail = async () => {
@@ -249,44 +250,44 @@ const ProductDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => navigate(`/edit-product/${product._id}`)}
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  Edit Product
-                </button>
-                {user && product.createdBy && (
-                  // Check matching IDs (handling both _id and id properties, converting to string)
-                  String(user._id || user.id) === String(product.createdBy._id || product.createdBy)
-                ) && (
-                    <>
-                      {!product.isDeleted ? (
-                        <button
-                          onClick={handleSoftDelete}
-                          disabled={deleting}
-                          className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {deleting ? 'Processing...' : 'Move to Trash'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleRestore}
-                          disabled={deleting}
-                          className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {deleting ? 'Processing...' : 'Restore'}
-                        </button>
-                      )}
+                {hasPermission('update_product') && (
+                  <button
+                    onClick={() => navigate(`/edit-product/${product._id}`)}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    Edit Product
+                  </button>
+                )}
 
+                {hasPermission('delete_product') && (
+                  <>
+                    {!product.isDeleted ? (
                       <button
-                        onClick={handleForceDelete}
+                        onClick={handleSoftDelete}
                         disabled={deleting}
-                        className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {deleting ? 'Processing...' : 'Delete'}
+                        {deleting ? 'Processing...' : 'Move to Trash'}
                       </button>
-                    </>
-                  )}
+                    ) : (
+                      <button
+                        onClick={handleRestore}
+                        disabled={deleting}
+                        className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deleting ? 'Processing...' : 'Restore'}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={handleForceDelete}
+                      disabled={deleting}
+                      className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {deleting ? 'Processing...' : 'Delete'}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

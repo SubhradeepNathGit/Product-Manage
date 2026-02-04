@@ -6,7 +6,7 @@ import { ShoppingBag, Laptop, Smartphone, Shirt, BookOpen, Home, Trophy, Gamepad
 const Sidebar = ({ selectedCategory, onCategoryChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, hasPermission } = useContext(AuthContext);
 
   const categories = [
     { id: '', name: 'All Categories', icon: Package },
@@ -115,27 +115,35 @@ const Sidebar = ({ selectedCategory, onCategoryChange }) => {
             Categories
           </h3>
           <ul className="space-y-1">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
-              return (
-                <li key={category.id}>
-                  <button
-                    onClick={() => handleCategoryClick(category.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
+            {categories
+              .filter(category => {
+                // Hide trash category if user doesn't have delete permission
+                if (category.id === 'trash' && !hasPermission('delete_product')) {
+                  return false;
+                }
+                return true;
+              })
+              .map((category) => {
+                const Icon = category.icon;
+                const isActive = selectedCategory === category.id;
+                return (
+                  <li key={category.id}>
+                    <button
+                      onClick={() => handleCategoryClick(category.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
-                      }`}
-                  >
-                    <Icon
-                      className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'
                         }`}
-                    />
-                    <span className="truncate">{category.name}</span>
-                  </button>
-                </li>
-              );
-            })}
+                    >
+                      <Icon
+                        className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-blue-500'
+                          }`}
+                      />
+                      <span className="truncate">{category.name}</span>
+                    </button>
+                  </li>
+                );
+              })}
           </ul>
         </nav>
 

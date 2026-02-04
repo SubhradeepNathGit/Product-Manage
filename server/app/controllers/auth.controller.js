@@ -18,7 +18,8 @@ const sendTokenResponse = async (user, statusCode, res) => {
             id: user._id,
             name: user.name,
             email: user.email,
-            profileImage: user.profileImage
+            profileImage: user.profileImage,
+            role: user.role
         }
     });
 };
@@ -30,13 +31,10 @@ const sendEmail = require("../utils/sendEmail");
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
 exports.register = async (req, res, next) => {
     try {
-
-        const user = await authService.register(req.body);
+        const { name, email, password, role } = req.body;
+        const user = await authService.register({ name, email, password, role });
 
         // HTML Body
         const message = `

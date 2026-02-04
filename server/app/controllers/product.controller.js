@@ -65,7 +65,7 @@ exports.updateProduct = async (req, res, next) => {
             productData.image = req.file.path;
         }
 
-        const product = await productService.updateProduct(req.params.id, req.user.id, productData);
+        const product = await productService.updateProduct(req.params.id, req.user.id, productData, req.user.role);
         res.status(200).json({
             success: true,
             data: product,
@@ -80,7 +80,7 @@ exports.updateProduct = async (req, res, next) => {
 // @access  Private
 exports.deleteProduct = async (req, res, next) => {
     try {
-        const result = await productService.deleteProduct(req.params.id, req.user.id);
+        const result = await productService.deleteProduct(req.params.id, req.user.id, req.user.role);
         res.status(200).json({
             success: true,
             data: result,
@@ -95,7 +95,7 @@ exports.deleteProduct = async (req, res, next) => {
 // @access  Private
 exports.restoreProduct = async (req, res, next) => {
     try {
-        const result = await productService.restoreProduct(req.params.id, req.user.id);
+        const result = await productService.restoreProduct(req.params.id, req.user.id, req.user.role);
         res.status(200).json({
             success: true,
             data: result,
@@ -110,7 +110,7 @@ exports.restoreProduct = async (req, res, next) => {
 // @access  Private
 exports.forceDeleteProduct = async (req, res, next) => {
     try {
-        const result = await productService.forceDeleteProduct(req.params.id, req.user.id);
+        const result = await productService.forceDeleteProduct(req.params.id, req.user.id, req.user.role);
         res.status(200).json(result);
     } catch (err) {
         next(err);

@@ -15,6 +15,7 @@ exports.register = async (userData) => {
         name,
         email,
         password,
+        role: userData.role || "employee",
         otp,
         otpExpire,
         isVerified: false,
