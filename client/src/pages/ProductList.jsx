@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import api from "../api/axios";
+import api from "../api/axiosInstance";
 import AuthContext from "../context/AuthContext";
 import { toast } from "react-toastify";
 

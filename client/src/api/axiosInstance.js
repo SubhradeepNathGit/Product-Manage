@@ -46,7 +46,15 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check if the request is for a public route that shouldn't trigger refresh
+    const isPublicRoute = originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/register') ||
+      originalRequest.url.includes('/auth/verify-email') ||
+      originalRequest.url.includes('/auth/resend-otp') ||
+      originalRequest.url.includes('/auth/forgotpassword') ||
+      originalRequest.url.includes('/auth/resetpassword');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isPublicRoute) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });

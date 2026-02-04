@@ -46,6 +46,26 @@ const UserSchema = new mongoose.Schema(
             enum: ["admin", "manager", "employee"],
             default: "employee",
         },
+        employeeId: {
+            type: String,
+            unique: true,
+            sparse: true, // Allows null values to be non-unique
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
+        isFirstLogin: {
+            type: Boolean,
+            default: false,
+        },
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+        lastPasswordChange: {
+            type: Date,
+        },
         resetPasswordToken: String,
         resetPasswordExpire: Date,
     },

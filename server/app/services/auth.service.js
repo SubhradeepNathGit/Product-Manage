@@ -46,6 +46,11 @@ exports.login = async (email, password) => {
         throw new ErrorResponse("Please verify your email to login", 401);
     }
 
+    // Check if employee account is active
+    if (user.employeeId && !user.isActive) {
+        throw new ErrorResponse("Your account has been deactivated. Please contact your administrator.", 401);
+    }
+
     return user;
 };
 

@@ -8,6 +8,9 @@ import {
     Save,
     Loader,
     ChevronRight,
+    Lock,
+    Eye,
+    EyeOff
 } from "lucide-react";
 import AuthContext from "../context/AuthContext";
 import productApi from "../api/productApi";
@@ -16,7 +19,7 @@ import { toast } from "react-toastify";
 import ProductCard from "./ProductCard";
 
 const ProfileModal = ({ isOpen, onClose }) => {
-    const { user } = useContext(AuthContext);
+    const { user, updatePassword } = useContext(AuthContext);
 
     const [activeTab, setActiveTab] = useState("info");
     const [userProducts, setUserProducts] = useState([]);
@@ -29,7 +32,38 @@ const ProfileModal = ({ isOpen, onClose }) => {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Change Password State
+    const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const fileInputRef = useRef(null);
+
+    const handlePasswordUpdate = async (e) => {
+        e.preventDefault();
+
+        if (passwordData.new !== passwordData.confirm) {
+            toast.error("New passwords do not match");
+            return;
+        }
+
+        if (passwordData.new.length < 6) {
+            toast.error("New password must be at least 6 characters long");
+            return;
+        }
+
+        try {
+            setIsUpdatingPassword(true);
+            await updatePassword(passwordData.current, passwordData.new);
+            setPasswordData({ current: '', new: '', confirm: '' });
+        } catch (error) {
+            // Error handled in context or toast
+        } finally {
+            setIsUpdatingPassword(false);
+        }
+    };
 
     useEffect(() => {
         if (isOpen && user) {
@@ -153,8 +187,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
                         <button
                             onClick={() => setActiveTab("info")}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${activeTab === "info"
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                                    : "text-gray-700 hover:bg-white hover:shadow-sm"
+                                ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                                : "text-gray-700 hover:bg-white hover:shadow-sm"
                                 }`}
                         >
                             <User className="w-5 h-5" />
@@ -167,8 +201,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
                         <button
                             onClick={() => setActiveTab("products")}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${activeTab === "products"
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                                    : "text-gray-700 hover:bg-white hover:shadow-sm"
+                                ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                                : "text-gray-700 hover:bg-white hover:shadow-sm"
                                 }`}
                         >
                             <Package className="w-5 h-5" />
@@ -177,17 +211,34 @@ const ProfileModal = ({ isOpen, onClose }) => {
                                 <ChevronRight className="w-4 h-4" />
                             )}
                         </button>
+
+                        {user?.role === 'employee' && (
+                            <button
+                                onClick={() => setActiveTab("security")}
+                                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${activeTab === "security"
+                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                                    : "text-gray-700 hover:bg-white hover:shadow-sm"
+                                    }`}
+                            >
+                                <Lock className="w-5 h-5" />
+                                <span className="flex-1 text-left">Security</span>
+                                {activeTab === "security" && (
+                                    <ChevronRight className="w-4 h-4" />
+                                )}
+                            </button>
+                        )}
                     </div>
 
+
                     {/* Main Content */}
-                    <div className="flex-1 overflow-y-auto bg-white/10">
+                    <div className="flex-1 overflow-y-auto bg-gray-50/30">
                         {/* Personal Info */}
                         {activeTab === "info" && (
                             <div className="p-6 md:p-8">
-                                <div className="max-w-2xl mx-auto space-y-8">
-                                    <div className="flex flex-col items-center text-center pb-8 border-b border-gray-100">
-                                        <div className="relative group mb-6">
-                                            <div className="w-52 h-52 rounded-full overflow-hidden border-4 border-white ring-4 ring-blue-50">
+                                <div className="max-w-2xl mx-auto space-y-6">
+                                    <div className="flex flex-col items-center text-center pb-6 border-b border-gray-100">
+                                        <div className="relative group mb-4">
+                                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white ring-4 ring-blue-50 shadow-sm">
                                                 <img
                                                     src={profileImageUrl}
                                                     alt={user?.name}
@@ -222,19 +273,22 @@ const ProfileModal = ({ isOpen, onClose }) => {
                                                     <Mail className="w-4 h-4" />
                                                     {user?.email}
                                                 </p>
-                                                <button
-                                                    onClick={() => setIsEditing(true)}
-                                                    className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl"
-                                                >
-                                                    Edit Profile
-                                                </button>
+                                                <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
+                                                    <button
+                                                        onClick={() => setIsEditing(true)}
+                                                        className="w-full px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+                                                    >
+                                                        Edit Profile
+                                                    </button>
+                                                </div>
                                             </>
                                         ) : (
                                             <div className="w-full space-y-6 bg-gradient-to-br from-gray-50 to-blue-50/30 p-6 rounded-2xl">
                                                 <input
                                                     value={editName}
                                                     onChange={(e) => setEditName(e.target.value)}
-                                                    className="w-full px-4 py-3 rounded-xl border"
+                                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                                    placeholder="Enter your name"
                                                 />
 
                                                 <div className="flex gap-3">
@@ -245,7 +299,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
                                                             setSelectedFile(null);
                                                             setPreviewUrl(null);
                                                         }}
-                                                        className="flex-1 py-3 border rounded-xl"
+                                                        className="flex-1 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 font-medium"
                                                     >
                                                         Cancel
                                                     </button>
@@ -253,7 +307,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
                                                     <button
                                                         onClick={handleSaveProfile}
                                                         disabled={isSaving}
-                                                        className="flex-1 py-3 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2"
+                                                        className="flex-1 py-3 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 font-medium hover:bg-blue-700 disabled:opacity-70"
                                                     >
                                                         {isSaving ? (
                                                             <Loader className="animate-spin w-5 h-5" />
@@ -275,7 +329,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
                             <div className="p-6 md:p-8">
                                 {loadingProducts ? (
                                     <div className="flex justify-center py-20">
-                                        <Loader className="animate-spin w-8 h-8" />
+                                        <Loader className="animate-spin w-8 h-8 text-blue-600" />
                                     </div>
                                 ) : userProducts.length ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -284,10 +338,116 @@ const ProfileModal = ({ isOpen, onClose }) => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-20 text-gray-500">
-                                        No products yet
+                                    <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                                        <Package className="w-16 h-16 text-gray-200 mb-4" />
+                                        <p>No products added yet</p>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {/* Security */}
+                        {activeTab === "security" && (
+                            <div className="p-6 md:p-8">
+                                <div className="max-w-md mx-auto">
+                                    <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                            <Lock className="w-5 h-5 text-blue-600" />
+                                            Change Password
+                                        </h3>
+
+                                        <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Current Password
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type={showCurrentPassword ? "text" : "password"}
+                                                        required
+                                                        value={passwordData.current}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+                                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none pr-11"
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Password
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type={showNewPassword ? "text" : "password"}
+                                                        required
+                                                        value={passwordData.new}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none pr-11"
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                    </button>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    Must be at least 6 characters long
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Confirm New Password
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type={showConfirmPassword ? "text" : "password"}
+                                                        required
+                                                        value={passwordData.confirm}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none pr-11"
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-4">
+                                                <button
+                                                    type="submit"
+                                                    disabled={isUpdatingPassword}
+                                                    className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 flex items-center justify-center gap-2 disabled:opacity-70"
+                                                >
+                                                    {isUpdatingPassword ? (
+                                                        <>
+                                                            <Loader className="animate-spin w-5 h-5" />
+                                                            Updating...
+                                                        </>
+                                                    ) : (
+                                                        'Update Password'
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

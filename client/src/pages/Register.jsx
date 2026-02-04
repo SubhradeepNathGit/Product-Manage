@@ -69,7 +69,6 @@ const Register = () => {
                                 {...register("role", { required: "Role is required" })}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none ${errors.role ? 'border-red-500' : 'border-gray-300'}`}
                             >
-                                <option value="employee">Employee</option>
                                 <option value="manager">Manager</option>
                                 <option value="admin">Admin</option>
                             </select>

@@ -26,6 +26,12 @@ exports.protect = async (req, res, next) => {
             );
         }
 
+        if (!req.user.isActive) {
+            return next(
+                new ErrorResponse("Your account has been deactivated. Please contact support.", 401)
+            );
+        }
+
         next();
     } catch (err) {
         return next(new ErrorResponse("Not authorized to access this route", 401));

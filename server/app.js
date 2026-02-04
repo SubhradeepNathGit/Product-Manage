@@ -29,10 +29,12 @@ app.use("/uploads", express.static(path.join(__dirname, "app", "uploads")));
 const authRoutes = require("./app/routes/auth.routes");
 const userRoutes = require("./app/routes/user.routes");
 const productRoutes = require("./app/routes/product.routes");
+const employeeRoutes = require("./app/routes/employee.routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/employees", employeeRoutes);
 
 // Health Check
 app.get("/", (req, res) => {

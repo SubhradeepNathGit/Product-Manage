@@ -1,7 +1,7 @@
 import ProfileModal from './ProfileModal';
 import { useContext, useState } from 'react';
 import AuthContext from '../context/AuthContext';
-import { ShoppingBag, Laptop, Smartphone, Shirt, BookOpen, Home, Trophy, Gamepad2, Package, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingBag, Laptop, Smartphone, Shirt, BookOpen, Home, Trophy, Gamepad2, Package, Menu, X, User, LogOut, Users } from 'lucide-react';
 
 const Sidebar = ({ selectedCategory, onCategoryChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -145,6 +145,33 @@ const Sidebar = ({ selectedCategory, onCategoryChange }) => {
                 );
               })}
           </ul>
+
+          {/* Management Section - Admin Only */}
+          {user?.role === 'admin' && (
+            <>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-3 mt-6">
+                Management
+              </h3>
+              <ul className="space-y-1">
+                <li>
+                  <a
+                    href="/employees"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      window.location.href = '/employees';
+                    }}
+                  >
+                    <Users
+                      className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 text-gray-400 group-hover:text-blue-500"
+                    />
+                    <span className="truncate">Employees</span>
+                  </a>
+                </li>
+              </ul>
+            </>
+          )}
         </nav>
 
         {/* Footer */}

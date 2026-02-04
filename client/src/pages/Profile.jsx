@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import AuthContext from "../context/AuthContext";
-import api from "../api/axios";
+import api from "../api/axiosInstance";
 import { toast } from "react-toastify";
 
 const Profile = () => {

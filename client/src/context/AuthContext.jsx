@@ -33,8 +33,10 @@ export const AuthProvider = ({ children }) => {
                     setUser(data.data);
                 } catch (error) {
                     console.error("Auth init error", error);
-                    // If /auth/me fails, interceptor should have tried refresh. 
-                    // If it still fails, it will dispatch "auth-error" which calls logout().
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    setToken("");
+                    setUser(null);
                 }
             }
             setLoading(false);
@@ -138,6 +140,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updatePassword = async (currentPassword, newPassword) => {
+        try {
+            const response = await api.put("/auth/updatepassword", { currentPassword, newPassword });
+            const { accessToken, refreshToken, user } = response.data;
+
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            setToken(accessToken);
+            setUser(user);
+
+            toast.success("Password updated successfully!");
+            return response.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to update password");
+            throw error;
+        }
+    };
+
     const logout = async () => {
         // Prevent multiple toasts/actions if already logged out (e.g. multiple failed requests triggering 401)
         const isSessionActive = !!localStorage.getItem("accessToken");
@@ -164,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, hasPermission, verifyOtp, resendOtp, forgotPassword, resetPassword, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, hasPermission, verifyOtp, resendOtp, forgotPassword, resetPassword, updatePassword, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
