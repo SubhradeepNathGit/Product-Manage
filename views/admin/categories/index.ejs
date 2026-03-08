@@ -1,0 +1,68 @@
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700;">Category Management</h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Create and organize categories for your products.</p>
+    </div>
+    <a href="/admin/categories/add" class="add-btn">
+        <span>Add New Category</span>
+    </a>
+</div>
+
+<div class="form-card" style="max-width: 100%; padding: 0; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead style="background: var(--background-light);">
+                <tr>
+                    <th class="ps-4 py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Category Name</th>
+                    <th class="py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        URL Slug</th>
+                    <th class="text-end pe-4 py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(cat=> { %>
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div style="font-weight: 600; color: var(--text-dark); font-size: 1rem;">
+                                <%= cat.name %>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <code
+                                style="background: var(--background-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">/<%= cat.slug %></code>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <a href="/admin/categories/edit/<%= cat._id %>" class="view-btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    Edit
+                                </a>
+                                <a href="/admin/categories/delete/<%= cat._id %>" class="view-btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem; color: #DC2626; border-color: #FEE2E2;"
+                                    onclick="return confirm('Are you sure you want to soft delete this category?')">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                        <% if(categories.length===0) { %>
+                            <tr>
+                                <td colspan="3" class="text-center py-5">
+                                    <div style="color: var(--text-muted);">
+                                        <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+                                        <h5 style="font-weight: 600;">No categories found</h5>
+                                        <p>Get started by creating your first product category.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+<nav aria-label="breadcrumb" style="margin-bottom: 2rem;">
+    <ol class="breadcrumb"
+        style="background: transparent; padding: 0; margin: 0; display: flex; list-style: none; gap: 0.5rem; font-size: 0.875rem;">
+        <li><a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a></li>
+        <li style="color: var(--text-muted);">/</li>
+        <li><a href="/?category=<%= product.category ? product.category.slug : '' %>"
+                style="color: var(--text-muted); text-decoration: none;">
+                <%= product.category ? product.category.name : 'Uncategorized' %>
+            </a></li>
+        <li style="color: var(--text-muted);">/</li>
+        <li style="color: var(--text-dark); font-weight: 600;">
+            <%= product.name %>
+        </li>
+    </ol>
+</nav>
+
+<div class="form-card" style="display: flex; gap: 3rem; max-width: 1200px; padding: 3rem;">
+    <!-- Product Image -->
+    <div
+        style="flex: 1; min-width: 400px; background: #F1F5F9; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+        <img src="<%= product.image && (product.image.startsWith('http://') || product.image.startsWith('https://')) ? product.image : '/uploads/' + product.image %>"
+            alt="<%= product.name %>" style="max-width: 100%; max-height: 500px; object-fit: contain;">
+    </div>
+
+    <!-- Product Content -->
+    <div style="flex: 1; display: flex; flex-direction: column;">
+        <div style="margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: center;">
+            <span
+                style="background-color: var(--primary-light); color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px; text-transform: uppercase;">
+                <%= product.category ? product.category.name : 'N/A' %>
+            </span>
+            <% if (product.inStock !==false) { %>
+                <span
+                    style="background-color: #DCFCE7; color: #166534; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px;">IN
+                    STOCK</span>
+                <% } else { %>
+                    <span
+                        style="background-color: #FEE2E2; color: #991B1B; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px;">OUT
+                        OF STOCK</span>
+                    <% } %>
+        </div>
+
+        <h1 style="font-size: 2.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 1.5rem;">
+            <%= product.name %>
+        </h1>
+
+        <div style="font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin-bottom: 2rem;">
+            ₹ <%= product.price ? product.price.toLocaleString() : '1,69,900' %>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 2rem; margin-bottom: 2rem;">
+            <h5 style="font-weight: 700; margin-bottom: 1rem;">Description</h5>
+            <p style="color: var(--text-muted); line-height: 1.8; font-size: 1rem; white-space: pre-line;">
+                <%= product.description %>
+            </p>
+        </div>
+
+        <div style="margin-top: auto; display: flex; gap: 1rem;">
+            <a href="/" class="view-btn" style="flex: 1;">Back to Shop</a>
+
+        </div>
+    </div>
+</div>

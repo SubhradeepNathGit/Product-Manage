@@ -1,0 +1,34 @@
+{
+  "name": "product-manage",
+  "version": "1.0.0",
+  "description": "A high-performance, full-stack **MERN** (MongoDB, Express, React, Node.js) web application designed for seamless product management. This project implements secure authentication, email verification, and cloud-based image handling with a focus on modern UI/UX and robust backend architecture.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SubhradeepNathGit/Product-Manage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SubhradeepNathGit/Product-Manage/issues"
+  },
+  "homepage": "https://github.com/SubhradeepNathGit/Product-Manage#readme",
+  "dependencies": {
+    "connect-flash": "^0.1.1",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
+    "joi": "^18.0.2",
+    "mongoose": "^9.2.4",
+    "multer": "^2.1.1",
+    "nodemon": "^3.1.14",
+    "slugify": "^1.6.6"
+  }
+}

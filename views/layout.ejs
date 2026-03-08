@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - My Store
+    </title>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/" class="sidebar-brand">
+                <span>My Store</span>
+            </a>
+
+
+
+            <nav>
+                <div class="sidebar-section-title">Categories</div>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-nav-item">
+                        <a href="/" class="sidebar-nav-link <%= !locals.selectedCategory ? 'active' : '' %>">
+                            <span>All Categories</span>
+                        </a>
+                    </li>
+                    <% if (locals.globalCategories && globalCategories.length> 0) { %>
+                        <% globalCategories.forEach(cat=> { %>
+                            <li class="sidebar-nav-item">
+                                <a href="/?category=<%= cat.slug %>"
+                                    class="sidebar-nav-link <%= locals.selectedCategory === cat.slug ? 'active' : '' %>">
+                                    <% let icon='bi-tag' ; if (cat.name.toLowerCase().includes('electron'))
+                                        icon='bi-laptop' ; if (cat.name.toLowerCase().includes('fash'))
+                                        icon='bi-bag-heart' ; if (cat.name.toLowerCase().includes('book'))
+                                        icon='bi-book' ; if (cat.name.toLowerCase().includes('home'))
+                                        icon='bi-house-heart' ; if (cat.name.toLowerCase().includes('sport'))
+                                        icon='bi-trophy' ; if (cat.name.toLowerCase().includes('toy'))
+                                        icon='bi-joystick' ; %>
+                                        <span>
+                                            <%= cat.name %>
+                                        </span>
+                                </a>
+                            </li>
+                            <% }) %>
+                                <% } %>
+                                    <li class="sidebar-nav-item">
+                                        <a href="/admin" class="sidebar-nav-link">
+                                            <span>Admin Portal</span>
+                                        </a>
+                                    </li>
+
+                </ul>
+            </nav>
+
+
+
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <% if(success_msg !='' ) { %>
+                <div
+                    style="background-color: #DCFCE7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #BBF7D0;">
+                    <%= success_msg %>
+                </div>
+                <% } %>
+
+                    <% if(error_msg !='' ) { %>
+                        <div
+                            style="background-color: #FEE2E2; color: #991B1B; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #FECACA;">
+                            <%= error_msg %>
+                        </div>
+                        <% } %>
+
+                            <%- body %>
+        </main>
+    </div>
+
+    <!-- Bootstrap Bundle (for dropdowns etc if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

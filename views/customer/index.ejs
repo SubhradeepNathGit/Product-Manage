@@ -1,0 +1,105 @@
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700;">See All Products</h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Browse our collection of products</p>
+    </div>
+    <a href="/admin/products/add" class="add-btn">
+        <i class="bi bi-plus"></i>
+        <span>Add Product</span>
+    </a>
+</div>
+
+<form action="/" method="GET">
+    <input type="hidden" name="category" value="<%= selectedCategory || '' %>">
+
+    <div class="search-bar-container">
+
+        <input type="text" name="search" placeholder="Search products by name..." value="<%= search || '' %>">
+    </div>
+
+    <div class="filters-row">
+        <div class="filter-group">
+            <select name="sort" class="form-select"
+                style="width: 200px; border-radius: 9999px; border: 1px solid var(--border);"
+                onchange="this.form.submit()">
+                <option value="newest" <%=sort==='newest' ? 'selected' : '' %>>Newest Arrivals</option>
+                <option value="price-low" <%=sort==='price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                <option value="price-high" <%=sort==='price-high' ? 'selected' : '' %>>Price: High to Low</option>
+            </select>
+        </div>
+
+        <div class="filter-group" style="flex: 1; max-width: 400px; display: flex; align-items: center; gap: 0.75rem;">
+            <label class="form-label" style="margin-bottom: 0; white-space: nowrap; font-weight: 600;">Price
+                Range:</label>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+                <input type="number" name="minPrice" placeholder="Min" value="<%= minPrice %>"
+                    style="width: 80px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem;"
+                    onchange="this.form.submit()">
+                <span style="color: var(--text-muted);">—</span>
+                <input type="number" name="maxPrice" placeholder="Max" value="<%= maxPrice %>"
+                    style="width: 80px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem;"
+                    onchange="this.form.submit()">
+            </div>
+        </div>
+
+        <div class="filter-group ms-auto">
+            <div class="form-check form-switch d-flex align-items-center gap-2">
+                <label class="form-check-label text-muted" for="stockSwitch">In Stock</label>
+                <input class="form-check-input" type="checkbox" id="stockSwitch" name="stock" value="true"
+                    <%=stock==='true' ? 'checked' : '' %> onchange="this.form.submit()">
+            </div>
+            <button type="button" class="btn btn-link p-0 ms-3 text-muted" title="Clear Filters">
+
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="product-grid">
+    <% products.forEach(product=> { %>
+        <div class="product-card">
+            <div class="product-img-container">
+                <% if (product.category) { %>
+                    <span class="category-tag">
+                        <%= product.category.name %>
+                    </span>
+                    <% } %>
+
+                        <% if (product.inStock) { %>
+                            <span class="stock-tag"
+                                style="background-color: #DCFCE7; color: #166534; border-radius: 6px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 700; position: absolute; top: 10px; right: 10px; z-index: 10;">IN
+                                STOCK</span>
+                            <% } else { %>
+                                <span class="stock-tag"
+                                    style="background-color: #FEE2E2; color: #991B1B; border-radius: 6px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 700; position: absolute; top: 10px; right: 10px; z-index: 10;">OUT
+                                    OF STOCK</span>
+                                <% } %>
+
+                                    <img src="<%= product.image && (product.image.startsWith('http://') || product.image.startsWith('https://')) ? product.image : '/uploads/' + product.image %>"
+                                        alt="<%= product.name %>" class="product-img">
+            </div>
+
+            <div class="product-info">
+                <h3 class="product-title" title="<%= product.name %>">
+                    <%= product.name %>
+                </h3>
+                <p class="product-desc">
+                    <%= product.description %>
+                </p>
+                <div class="product-price">₹ <%= product.price ? product.price.toLocaleString() : '1,69,900' %>
+                </div>
+                <a href="/product/<%= product._id %>" class="view-btn">View Details</a>
+            </div>
+        </div>
+        <% }) %>
+
+            <% if (products.length===0) { %>
+                <div
+                    style="grid-column: 1 / -1; text-align: center; padding: 5rem; background: var(--white); border-radius: 12px; border: 1px dashed var(--border);">
+                    <i class="bi bi-search" style="font-size: 3rem; color: var(--text-muted); opacity: 0.5;"></i>
+                    <h4 class="mt-3">No products found</h4>
+                    <p class="text-muted">Try adjusting your search or category filters</p>
+                    <a href="/" class="btn btn-primary mt-3" style="border-radius: 9999px;">Reset Filters</a>
+                </div>
+                <% } %>
+</div>

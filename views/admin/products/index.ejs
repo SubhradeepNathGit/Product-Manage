@@ -1,0 +1,123 @@
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700;">Product Management</h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Manage your store's inventory and product details.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <form action="/admin/products/clear-all" method="POST" style="margin: 0;"
+            onsubmit="return confirm('⚠️ Are you sure you want to permanently delete ALL products? This action cannot be undone.')">
+            <button type="submit" class="view-btn"
+                style="padding: 0.6rem 1.2rem; font-size: 0.875rem; color: #DC2626; border-color: #FEE2E2; font-weight: 600; cursor: pointer; background: #FFF5F5; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Clear All Products
+            </button>
+        </form>
+        <a href="/admin/products/add" class="add-btn" style="border-radius: 8px;">
+            <span>Add New Product</span>
+        </a>
+    </div>
+</div>
+
+<div class="form-card" style="max-width: 100%; padding: 0; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead style="background: var(--background-light);">
+                <tr>
+                    <th class="ps-4 py-3 text-secondary"
+                        style="width: 80px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Image</th>
+                    <th class="py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Product Details</th>
+                    <th class="py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Category</th>
+                    <th class="py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Price</th>
+                    <th class="py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Status</th>
+                    <th class="text-end pe-4 py-3 text-secondary"
+                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products.forEach(product=> { %>
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div
+                                style="width: 56px; height: 56px; background: var(--background-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border);">
+                                <img src="<%= product.image && (product.image.startsWith('http://') || product.image.startsWith('https://')) ? product.image : '/uploads/' + product.image %>"
+                                    alt="<%= product.name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div style="font-weight: 600; color: var(--text-dark); font-size: 1rem;">
+                                <%= product.name %>
+                            </div>
+                            <div
+                                style="font-size: 0.8125rem; color: var(--text-muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <%= product.description %>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <% if(product.category) { %>
+                                <span
+                                    style="background-color: var(--primary-light); color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; text-transform: uppercase;">
+                                    <%= product.category.name %>
+                                </span>
+                                <% } else { %>
+                                    <span
+                                        style="background-color: #F1F5F9; color: #94A3B8; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; text-transform: uppercase;">No
+                                        Category</span>
+                                    <% } %>
+                        </td>
+                        <td class="py-3">
+                            <div style="font-weight: 700; color: var(--text-dark);">₹ <%= product.price ?
+                                    product.price.toLocaleString() : '0' %>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <% if(product.inStock !==false) { %>
+                                <span
+                                    style="background-color: #DCFCE7; color: #166534; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px;">IN
+                                    STOCK</span>
+                                <% } else { %>
+                                    <span
+                                        style="background-color: #FEE2E2; color: #991B1B; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px;">OUT
+                                        OF STOCK</span>
+                                    <% } %>
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                <a href="/admin/products/edit/<%= product._id %>" class="view-btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    Edit
+                                </a>
+                                <a href="/admin/products/delete/<%= product._id %>" class="view-btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem; color: #DC2626; border-color: #FEE2E2;"
+                                    onclick="return confirm('Are you sure you want to delete this product?')">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                        <% if(products.length===0) { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div style="color: var(--text-muted);">
+                                        <i class="bi bi-box-seam fs-1 mb-2 d-block"></i>
+                                        <h5 style="font-weight: 600;">No products inventory</h5>
+                                        <p>Start building your catalog by adding your first product.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

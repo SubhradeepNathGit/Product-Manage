@@ -1,0 +1,85 @@
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700;">Add New Product</h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Create a new product listing for your store.</p>
+    </div>
+</div>
+
+<div class="form-card" style="max-width: 1000px;">
+    <% if(errors) { %>
+        <div
+            style="background-color: #FEE2E2; color: #991B1B; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #FECACA;">
+            <% errors.forEach(err=> { %>
+                <p class="mb-1 fw-500">
+                    <%= err.message %>
+                </p>
+                <% }) %>
+        </div>
+        <% } %>
+
+            <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" name="name" id="name" placeholder="e.g. iPhone 15 Pro..." required
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 0.875rem; color: var(--text-dark); transition: var(--transition);">
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (₹)</label>
+                        <input type="number" name="price" id="price" placeholder="0.00" min="0" required
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 0.875rem; color: var(--text-dark); transition: var(--transition);">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select name="category" id="category" required
+                            style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 0.875rem; color: var(--text-dark); transition: var(--transition); appearance: none;">
+                            <option value="" disabled selected>Select Category</option>
+                            <% categories.forEach(cat=> { %>
+                                <option value="<%= cat._id %>">
+                                    <%= cat.name %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="inStock" id="inStock" checked
+                            style="width: 2.5rem; height: 1.25rem; cursor: pointer;">
+                        <label class="form-check-label ms-2" for="inStock" style="font-weight: 600; cursor: pointer;">
+                            Product is currently in stock
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="description">Detailed Description</label>
+                    <textarea name="description" id="description" rows="5"
+                        placeholder="Tell customers more about this product..." required
+                        style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 0.875rem; color: var(--text-dark); resize: vertical;"></textarea>
+                </div>
+
+                <div class="mb-5 bg-light p-4 rounded-3 border border-dashed"
+                    style="text-align: center; border-radius: 12px; border: 2px dashed var(--border); background: var(--background-light); padding: 3rem;">
+                    <label for="image" style="cursor: pointer;">
+                        <span
+                            style="font-weight: 700; color: var(--text-dark); display: block; margin-bottom: 0.5rem;">Upload
+                            Product Image</span>
+                        <span style="color: var(--text-muted); font-size: 0.8125rem;">Drag and drop or click to browse
+                            (JPG, PNG, WEBP)</span>
+                    </label>
+                    <input type="file" name="image" id="image" accept="image/*" required
+                        style="margin-top: 1.5rem; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto;">
+                </div>
+
+                <div
+                    style="display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 2rem;">
+                    <a href="/admin/products" class="view-btn"
+                        style="min-width: 151px; text-align: center; line-height: 1.5;">Cancel</a>
+                    <button type="submit" class="add-btn" style="min-width: 200px;">
+                        <span>Publish Product</span>
+                    </button>
+                </div>
+            </form>
+</div>

@@ -1,0 +1,36 @@
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700;">Add New Category</h1>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Create a new category to organize your products.</p>
+    </div>
+</div>
+
+<div class="form-card" style="max-width: 600px;">
+    <% if(errors) { %>
+        <div
+            style="background-color: #FEE2E2; color: #991B1B; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #FECACA;">
+            <% errors.forEach(err=> { %>
+                <p class="mb-1 fw-500">
+                    <%= err.message %>
+                </p>
+                <% }) %>
+        </div>
+        <% } %>
+
+            <form action="/admin/categories/add" method="POST">
+                <div class="form-group">
+                    <label for="name">Category Name</label>
+                    <input type="text" name="name" id="name" placeholder="e.g. Electronics, Clothing..." required
+                        style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 0.875rem; color: var(--text-dark); transition: var(--transition);">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="add-btn" style="flex: 1;">
+                        <span>Save Category</span>
+                    </button>
+                    <a href="/admin/categories" class="view-btn" style="flex: 1; text-align: center; line-height: 1.5;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+</div>
