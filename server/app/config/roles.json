@@ -1,0 +1,28 @@
+{
+    "roles": [
+        {
+            "name": "admin",
+            "permissions": [
+                "create_product",
+                "read_product",
+                "update_product",
+                "delete_product"
+            ]
+        },
+        {
+            "name": "manager",
+            "permissions": [
+                "create_product",
+                "read_product",
+                "update_product"
+            ]
+        },
+        {
+            "name": "employee",
+            "permissions": [
+                "create_product",
+                "read_product"
+            ]
+        }
+    ]
+}
